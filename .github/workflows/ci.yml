@@ -1,0 +1,54 @@
+---
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: pre-commit/action@v3.0.1
+
+  typing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --group typing mypy src
+
+  tests:
+    name: "Python ${{ matrix.python-version }} - fastapi ${{ matrix.fastapi-version }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        # the minimal supported version and the latest one
+        fastapi-version: ["0.138.0", "latest"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Pin fastapi
+        if: matrix.fastapi-version != 'latest'
+        run: echo "FASTAPI_REQUIREMENT=fastapi==${{ matrix.fastapi-version }}" >> "$GITHUB_ENV"
+      - name: Run tests
+        run: |
+          uv run --group test --with "${FASTAPI_REQUIREMENT:-fastapi}" \
+            coverage run -m pytest
+          uv run --group test coverage xml
+      - uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          flags: unittests # optional
