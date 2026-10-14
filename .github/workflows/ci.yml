@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v10.3.0
       - run: uv run --group typing mypy src
 
   tests:
@@ -33,20 +33,29 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        # the minimal supported version and the latest one
+        # the minimal supported version of fastapi, and the latest versions of
+        # all the dependencies (as installed by the users of the library)
         fastapi-version: ["0.138.0", "latest"]
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Pin fastapi
-        if: matrix.fastapi-version != 'latest'
-        run: echo "FASTAPI_REQUIREMENT=fastapi==${{ matrix.fastapi-version }}" >> "$GITHUB_ENV"
+      - name: Select the version of fastapi
+        env:
+          FASTAPI_VERSION: ${{ matrix.fastapi-version }}
+        run: |
+          if [ "$FASTAPI_VERSION" = "latest" ]; then
+            # the latest versions of all the dependencies
+            uv lock --upgrade
+          else
+            uv lock --upgrade-package "fastapi==$FASTAPI_VERSION"
+          fi
+      - name: Show the tested versions
+        run: uv tree --depth 2
       - name: Run tests
         run: |
-          uv run --group test --with "${FASTAPI_REQUIREMENT:-fastapi}" \
-            coverage run -m pytest
+          uv run --group test coverage run -m pytest
           uv run --group test coverage xml
       - uses: codecov/codecov-action@v7
         with:

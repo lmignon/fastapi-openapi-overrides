@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -36,7 +36,8 @@ typing = [
 ]
 
 [tool.hatch.version]
-path = "src/fastapi_openapi_overrides/__init__.py"
+# the version is computed from the git tags
+source = "vcs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fastapi_openapi_overrides"]
@@ -83,3 +84,10 @@ extend-immutable-calls = [
     "fastapi.Query",
     "fastapi.Security",
 ]
+
+[tool.towncrier]
+name = "FastAPI OpenAPI Overrides"
+filename = "HISTORY.rst"
+directory = "news"
+issue_format = "`#{issue} <https://github.com/lmignon/fastapi-openapi-overrides/issues/{issue}>`_"
+title_format = "{version} ({project_date})"
