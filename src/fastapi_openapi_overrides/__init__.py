@@ -1,5 +1,7 @@
 """Document the dependency overrides of a FastAPI application into its OpenAPI schema."""
 
+from importlib.metadata import version
+
 from .main import (
     document_dependency_overrides,
     get_dependant_with_overrides,
@@ -7,7 +9,7 @@ from .main import (
     get_routes_with_overrides,
 )
 
-__version__ = "0.1.0"
+__version__ = version("fastapi-openapi-overrides")
 
 __all__ = [
     "document_dependency_overrides",

@@ -89,3 +89,18 @@ uv run --group test pytest
 uv run --group typing mypy src
 pre-commit run --all-files
 ```
+
+## Release
+
+The version of the package is computed from the git tags (hatch-vcs) and the
+changelog is built from the news fragments (towncrier).
+
+* Each change worth mentioning into the changelog comes with a news fragment
+  into the `news` directory: `news/<issue number>.<type>`, or
+  `news/+<name>.<type>` for a change without issue, where `<type>` is one of
+  `feature`, `bugfix`, `doc`, `removal` or `misc`.
+* To release a new version, run the `release` workflow from the GitHub "Actions"
+  tab and choose the part of the version to increase (`patch`, `minor` or
+  `major`). Once the run is approved (required reviewers of the
+  `release-approval` environment), the workflow updates `HISTORY.rst`, tags the
+  release, publishes the package to PyPI and creates the GitHub release.
