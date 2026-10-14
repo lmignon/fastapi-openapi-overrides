@@ -47,7 +47,7 @@ jobs:
         with:
           # the tags are required to compute the version
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v7
 
       - name: Compute the version
         id: version
